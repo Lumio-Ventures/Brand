@@ -157,6 +157,21 @@
                      );
                      return;
                   }
+                  // Opaque cross-origin errors (message "Script error." with no error
+                  // object or filename) come from injected/extension/in-app-browser
+                  // scripts we don't ship — never our bundled code. Log, don't deface
+                  // the published page with the debug overlay.
+                  if (
+                     /^Script error\.?$/.test(e.message || '') &&
+                     !e.error &&
+                     !e.filename
+                  ) {
+                     console.warn(
+                        '[bundle] ignored opaque cross-origin script error (likely a browser extension or in-app browser):',
+                        e.message,
+                     );
+                     return;
+                  }
                   var p = document.body || document.documentElement;
                   var d =
                      document.getElementById('__bundler_err') ||
